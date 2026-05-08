@@ -18,13 +18,13 @@ from datetime import datetime
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 SCRIPTS = [
-    ("01_road_network.py", "Road Network (OSMnx — may take 2-5 min)"),
-    ("02_terrain.py",      "Terrain Elevation (Open-Elevation API)"),
-    ("03_weather.py",      "Weather History (Open-Meteo API)"),
-    ("04_schools.py",      "Schools (UDISE+ / synthetic)"),
-    ("05_population.py",   "Population (Census 2011)"),
-    ("06_crime.py",        "Crime Rates (NCRB 2022)"),
-    ("07_quality_report.py", "Data Quality Report"),
+    ("01_fetch_road_network.py", "Road Network (OSMnx — may take 2-5 min)"),
+    ("02_fetch_terrain.py",      "Terrain Elevation (Open-Elevation API)"),
+    ("03_fetch_weather.py",      "Weather History (Open-Meteo API)"),
+    ("04_parse_udise.py",        "Schools (UDISE+ / synthetic)"),
+    ("05_parse_census.py",       "Population (Census 2011)"),
+    ("06_parse_crime.py",        "Crime Rates (NCRB 2022)"),
+    ("07_quality_report.py",     "Data Quality Report"),
 ]
 
 SKIP_ROADS = "--skip-roads" in sys.argv
@@ -60,7 +60,7 @@ total_t0 = time.time()
 
 for script_file, label in SCRIPTS:
     # Optionally skip the road network download
-    if script_file == "01_road_network.py" and SKIP_ROADS:
+    if script_file == "01_fetch_road_network.py" and SKIP_ROADS:
         print(f"\n  ⏭  SKIPPED: {label}  (--skip-roads flag set)")
         results.append((script_file, label, "SKIPPED", 0))
         continue

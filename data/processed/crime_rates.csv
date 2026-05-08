@@ -1,0 +1,31 @@
+taluk,crime_category,ipc_section,crime_type,count_2022,per_100k,data_year,data_source,crime_risk_score
+Yadgir,Rape (Sec 376 IPC),376,women,8,2.51,2022,NCRB Crime in India 2022,1.0
+Shahapur,Rape (Sec 376 IPC),376,women,4,1.64,2022,NCRB Crime in India 2022,0.0
+Surpur,Rape (Sec 376 IPC),376,women,4,2.25,2022,NCRB Crime in India 2022,0.1849
+Yadgir,Kidnapping & Abduction of Women,363/366,women,4,1.26,2022,NCRB Crime in India 2022,1.0
+Shahapur,Kidnapping & Abduction of Women,363/366,women,2,0.82,2022,NCRB Crime in India 2022,0.0
+Surpur,Kidnapping & Abduction of Women,363/366,women,2,1.13,2022,NCRB Crime in India 2022,0.1849
+Yadgir,Cruelty by Husband/Relatives (498A),498A,women,21,6.6,2022,NCRB Crime in India 2022,1.0
+Shahapur,Cruelty by Husband/Relatives (498A),498A,women,16,6.55,2022,NCRB Crime in India 2022,0.0
+Surpur,Cruelty by Husband/Relatives (498A),498A,women,11,6.19,2022,NCRB Crime in India 2022,0.1849
+Yadgir,Assault on Women (354 IPC),354,women,9,2.83,2022,NCRB Crime in India 2022,1.0
+Shahapur,Assault on Women (354 IPC),354,women,7,2.87,2022,NCRB Crime in India 2022,0.0
+Surpur,Assault on Women (354 IPC),354,women,6,3.38,2022,NCRB Crime in India 2022,0.1849
+Yadgir,Trafficking of Women,370,women,1,0.31,2022,NCRB Crime in India 2022,1.0
+Shahapur,Trafficking of Women,370,women,1,0.41,2022,NCRB Crime in India 2022,0.0
+Surpur,Trafficking of Women,370,women,1,0.56,2022,NCRB Crime in India 2022,0.1849
+Yadgir,Dowry Deaths (304B IPC),304B,women,2,0.63,2022,NCRB Crime in India 2022,1.0
+Shahapur,Dowry Deaths (304B IPC),304B,women,1,0.41,2022,NCRB Crime in India 2022,0.0
+Surpur,Dowry Deaths (304B IPC),304B,women,0,0.0,2022,NCRB Crime in India 2022,0.1849
+Yadgir,POCSO Act Offences,POCSO,children,9,2.83,2022,NCRB Crime in India 2022,1.0
+Shahapur,POCSO Act Offences,POCSO,children,8,3.28,2022,NCRB Crime in India 2022,0.0
+Surpur,POCSO Act Offences,POCSO,children,4,2.25,2022,NCRB Crime in India 2022,0.1849
+Yadgir,Kidnapping & Abduction of Children,363,children,4,1.26,2022,NCRB Crime in India 2022,1.0
+Shahapur,Kidnapping & Abduction of Children,363,children,3,1.23,2022,NCRB Crime in India 2022,0.0
+Surpur,Kidnapping & Abduction of Children,363,children,3,1.69,2022,NCRB Crime in India 2022,0.1849
+Yadgir,Child Labour (Child Labour Act),CLA,children,2,0.63,2022,NCRB Crime in India 2022,1.0
+Shahapur,Child Labour (Child Labour Act),CLA,children,3,1.23,2022,NCRB Crime in India 2022,0.0
+Surpur,Child Labour (Child Labour Act),CLA,children,2,1.13,2022,NCRB Crime in India 2022,0.1849
+Yadgir,Foeticide / Sex-selective Crimes,315/316,children,0,0.0,2022,NCRB Crime in India 2022,1.0
+Shahapur,Foeticide / Sex-selective Crimes,315/316,children,1,0.41,2022,NCRB Crime in India 2022,0.0
+Surpur,Foeticide / Sex-selective Crimes,315/316,children,0,0.0,2022,NCRB Crime in India 2022,0.1849
