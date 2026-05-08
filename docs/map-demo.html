@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafeRoute AI — Maps Layer Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column
+        }
+
+        /* ── App shell ─────────────────────────────────────── */
+        .app-header {
+            background: #0f172a;
+            border-bottom: 1px solid #1e293b;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 2000;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .logo-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #185FA5, #22c55e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f8fafc;
+            letter-spacing: -0.01em
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            color: #64748b;
+            letter-spacing: 0.06em;
+            text-transform: uppercase
+        }
+
+        .view-tabs {
+            display: flex;
+            gap: 6px
+        }
+
+        .tab-btn {
+            padding: 7px 16px;
+            border-radius: 8px;
+            border: 1.5px solid #1e293b;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.15s;
+        }
+
+        .tab-btn.active {
+            background: #185FA5;
+            color: #fff;
+            border-color: #185FA5
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #1e293b;
+            color: #f1f5f9
+        }
+
+        /* ── Layout ─────────────────────────────────────────── */
+        .app-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            height: calc(100vh - 62px)
+        }
+
+        .sidebar {
+            width: 260px;
+            min-width: 220px;
+            background: #0f172a;
+            border-right: 1px solid #1e293b;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 16px;
+            gap: 14px;
+            transition: transform 0.25s;
+        }
+
+        @media(max-width:700px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 62px;
+                bottom: 0;
+                z-index: 1500;
+                transform: translateX(-100%)
+            }
+
+            .sidebar.open {
+                transform: translateX(0)
+            }
+
+            .app-body {
+                flex-direction: column
+            }
+        }
+
+        .map-area {
+            flex: 1;
+            position: relative;
+            min-height: 0
+        }
+
+        #map {
+            width: 100%;
+            height: 100%
+        }
+
+        /* ── Sidebar UI ─────────────────────────────────────── */
+        .section-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .school-card {
+            background: #1e293b;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .school-card:hover,
+        .school-card.active {
+            border-color: #185FA5;
+            background: #1a2d45;
+        }
+
+        .school-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f1f5f9
+        }
+
+        .school-meta {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px
+        }
+
+        .school-score {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 99px;
+            margin-top: 5px;
+        }
+
+        .score-high {
+            background: #14532d22;
+            color: #22c55e;
+            border: 1px solid #166534
+        }
+
+        .score-mid {
+            background: #78350f22;
+            color: #f0962a;
+            border: 1px solid #92400e
+        }
+
+        .score-low {
+            background: #7f1d1d22;
+            color: #e84545;
+            border: 1px solid #991b1b
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .stat-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-top: 2px
+        }
+
+        .stat-sub {
+            font-size: 10px;
+            color: #64748b
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 8px 12px;
+        }
+
+        .toggle-label {
+            font-size: 12px;
+            color: #94a3b8
+        }
+
+        .toggle-sw {
+            width: 36px;
+            height: 20px;
+            border-radius: 99px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.2s;
+        }
+
+        .toggle-sw.on {
+            background: #185FA5
+        }
+
+        .toggle-sw.off {
+            background: #334155
+        }
+
+        .toggle-sw::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            transition: left 0.2s;
+        }
+
+        .toggle-sw.on::after {
+            left: 19px
+        }
+
+        /* ── Legend (Leaflet-positioned) ───────────────────── */
+        .map-legend {
+            position: absolute;
+            bottom: 28px;
+            right: 12px;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            padding: 10px 12px;
+            min-width: 170px;
+        }
+
+        .legend-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0;
+            font-size: 11px;
+            color: #cbd5e1
+        }
+
+        .legend-line {
+            height: 3px;
+            width: 22px;
+            border-radius: 2px;
+            flex-shrink: 0
+        }
+
+        .legend-dash {
+            height: 3px;
+            width: 22px;
+            border-radius: 2px;
+            flex-shrink: 0;
+            background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 8px);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0
+        }
+
+        .legend-circle {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border-width: 2px;
+            border-style: dashed;
+            background: transparent;
+        }
+
+        .legend-divider {
+            border: none;
+            border-top: 1px solid #1e293b;
+            margin: 6px 0
+        }
+
+        .legend-gradient {
+            height: 8px;
+            border-radius: 4px;
+            width: 100%;
+            background: linear-gradient(90deg, #22c55e, #f0962a, #e84545);
+            margin: 4px 0;
+        }
+
+        .legend-sub {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #475569
+        }
+
+        /* ── Popup styling ──────────────────────────────────── */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+        .leaflet-popup-content {
+            margin: 0 !important;
+            padding: 14px 16px !important
+        }
+
+        .leaflet-popup-tip-container {
+            margin-top: -1px
+        }
+
+        /* ── Pulse animation ────────────────────────────────── */
+        @keyframes sr-pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.45
+            }
+        }
+
+        .sr-route-rec {
+            animation: sr-pulse 2s ease-in-out infinite
+        }
+
+        /* ── Mobile toggle button ───────────────────────────── */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 16px;
+            z-index: 1600;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #185FA5;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(24, 95, 165, 0.5);
+        }
+
+        @media(max-width:700px) {
+            .sidebar-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center
+            }
+        }
+
+        /* Route tooltip */
+        .leaflet-tooltip {
+            background: rgba(15, 23, 42, 0.97) !important;
+            color: #f1f5f9 !important;
+            border-color: #334155 !important;
+            border-radius: 8px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 12px !important
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Header ───────────────────────────────────────── -->
+    <header class="app-header">
+        <div class="app-logo">
+            <div class="logo-mark">🛡</div>
+            <div>
+                <div class="logo-text">SafeRoute AI</div>
+                <div class="logo-sub">Maps Layer Demo — Yadagiri, Telangana</div>
+            </div>
+        </div>
+        <div class="view-tabs">
+            <button class="tab-btn active" id="btn-village" onclick="switchView('village')">🏘 Village UI</button>
+            <button class="tab-btn" id="btn-lawmaker" onclick="switchView('lawmaker')">🏛 Lawmaker Dashboard</button>
+        </div>
+    </header>
+
+    <!-- ── App body ─────────────────────────────────────── -->
+    <div class="app-body">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div id="sidebar-content"></div>
+        </aside>
+
+        <!-- Map -->
+        <div class="map-area">
+            <div id="map"></div>
+            <!-- Legend -->
+            <div class="map-legend" id="legend"></div>
+        </div>
+    </div>
+
+    <!-- Mobile sidebar toggle -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script>
+        /* ════════════════════════════════════════════════════
+           SEED DATA
+           ════════════════════════════════════════════════════ */
+        const YADAGIRI = [16.7648, 77.1268];
+
+        const SCHOOLS = [
+            {
+                id: 's1', name: 'Zilla Parishad High School', lat: 16.774, lon: 77.118,
+                enrollment: 342, girlsPercent: 48, boysPercent: 52, dropoutRate: 11.2,
+                safetyScore: 0.72, distanceKm: 1.3
+            },
+            {
+                id: 's2', name: 'MPP Primary School Yadagiri', lat: 16.758, lon: 77.133,
+                enrollment: 218, girlsPercent: 42, boysPercent: 58, dropoutRate: 17.5,
+                safetyScore: 0.41, distanceKm: 2.1
+            },
+            {
+                id: 's3', name: 'Telangana Model School', lat: 16.781, lon: 77.142,
+                enrollment: 485, girlsPercent: 53, boysPercent: 47, dropoutRate: 6.3,
+                safetyScore: 0.85, distanceKm: 2.8
+            },
+            {
+                id: 's4', name: 'Govt. Girls High School', lat: 16.749, lon: 77.109,
+                enrollment: 276, girlsPercent: 100, boysPercent: 0, dropoutRate: 14.1,
+                safetyScore: 0.33, distanceKm: 3.5
+            },
+        ];
+
+        const ROUTES_TO_S1 = [
+            {
+                id: 'r1', safetyScore: 0.82, isRecommended: true,
+                topRiskFactor: 'Minor road crossing', distanceKm: 1.3, minutesWalk: 17,
+                latlngs: [
+                    [16.7648, 77.1268], [16.766, 77.122], [16.769, 77.120], [16.772, 77.118], [16.774, 77.118]
+                ]
+            },
+            {
+                id: 'r2', safetyScore: 0.55, isRecommended: false,
+                topRiskFactor: 'Low lighting after 6pm', distanceKm: 1.6, minutesWalk: 21,
+                latlngs: [
+                    [16.7648, 77.1268], [16.763, 77.120], [16.765, 77.116], [16.769, 77.116], [16.774, 77.118]
+                ]
+            },
+            {
+                id: 'r3', safetyScore: 0.28, isRecommended: false,
+                topRiskFactor: 'Isolated road, crime incidents', distanceKm: 1.1, minutesWalk: 14,
+                latlngs: [
+                    [16.7648, 77.1268], [16.767, 77.125], [16.771, 77.123], [16.774, 77.118]
+                ]
+            },
+        ];
+
+        const HEAT_POINTS = [
+            { lat: 16.761, lon: 77.125, intensity: 0.9 }, { lat: 16.762, lon: 77.126, intensity: 0.85 },
+            { lat: 16.760, lon: 77.127, intensity: 0.8 }, { lat: 16.755, lon: 77.115, intensity: 0.75 },
+            { lat: 16.756, lon: 77.114, intensity: 0.7 }, { lat: 16.771, lon: 77.135, intensity: 0.65 },
+            { lat: 16.770, lon: 77.136, intensity: 0.6 }, { lat: 16.768, lon: 77.110, intensity: 0.55 },
+            { lat: 16.780, lon: 77.130, intensity: 0.3 }, { lat: 16.775, lon: 77.122, intensity: 0.25 },
+            { lat: 16.758, lon: 77.140, intensity: 0.8 }, { lat: 16.759, lon: 77.141, intensity: 0.75 },
+            { lat: 16.763, lon: 77.120, intensity: 0.9 }, { lat: 16.764, lon: 77.121, intensity: 0.85 },
+            { lat: 16.750, lon: 77.130, intensity: 0.6 }, { lat: 16.749, lon: 77.115, intensity: 0.85 },
+            { lat: 16.748, lon: 77.116, intensity: 0.8 }, { lat: 16.747, lon: 77.109, intensity: 0.9 },
+        ];
+
+        const NO_BUS_ROUTES = [
+            {
+                id: 'nb1', label: 'Siddhapuram Rd – 4.2 km no bus stop',
+                latlngs: [[16.755, 77.108], [16.752, 77.112], [16.749, 77.115], [16.747, 77.118]]
+            },
+            {
+                id: 'nb2', label: 'Chandampet bypass – isolated stretch',
+                latlngs: [[16.775, 77.145], [16.778, 77.148], [16.782, 77.150]]
+            },
+        ];
+
+        const DEAD_ZONES = [
+            { id: 'dz1', lat: 16.748, lon: 77.112, label: 'Siddhapuram dead zone' },
+            { id: 'dz2', lat: 16.782, lon: 77.150, label: 'Chandampet fringe – no signal' },
+        ];
+
+        const UNLIT_SEGMENTS = [
+            {
+                id: 'ul1', label: 'NH65 service road – no lights',
+                latlngs: [[16.761, 77.124], [16.763, 77.120], [16.765, 77.117]]
+            },
+            {
+                id: 'ul2', label: 'Raichur Rd – unlit 1.8 km stretch',
+                latlngs: [[16.770, 77.136], [16.773, 77.139], [16.776, 77.142]]
+            },
+        ];
+
+        /* ════════════════════════════════════════════════════
+           MAP SETUP
+           ════════════════════════════════════════════════════ */
+        let map, currentView = 'village';
+        let selectedSchool = null;
+        let showHeatmap = true, showInfra = true, showSchools = true;
+
+        // Layer handles
+        let boundaryCircle, schoolMarkers = [], routeLayers = [],
+            heatLayer, infraLayers = [], shadowLayers = [];
+
+        function initMap() {
+            map = L.map('map', { center: YADAGIRI, zoom: 13, zoomControl: true });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors', maxZoom: 19
+            }).addTo(map);
+        }
+
+        /* ── Boundary Circle ─────────────────────────── */
+        function drawBoundary(animate = false, colour = '#378ADD') {
+            if (boundaryCircle) { boundaryCircle.remove(); }
+
+            const startR = animate ? 1 : 7000;
+            boundaryCircle = L.circle(YADAGIRI, {
+                radius: startR, color: colour, fillColor: colour,
+                fillOpacity: 0.04, weight: 2, dashArray: '10 8', interactive: false,
+            }).addTo(map);
+
+            if (animate) {
+                const t0 = performance.now();
+                const ease = t => 1 - Math.pow(1 - t, 3);
+                const step = (now) => {
+                    const p = Math.min((now - t0) / 900, 1);
+                    boundaryCircle.setRadius(ease(p) * 7000);
+                    if (p < 1) requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+            }
+
+            // Dashed offset animation
+            let off = 0;
+            setInterval(() => {
+                off = (off + 1) % 18;
+                boundaryCircle.setStyle({ dashOffset: `${off}` });
+            }, 60);
+        }
+
+        /* ── School Markers ──────────────────────────── */
+        function buildSchoolIcon(selected) {
+            const bg = selected ? '#185FA5' : '#fff';
+            const stroke = selected ? '#185FA5' : '#378ADD';
+            const ic = selected ? '#fff' : '#185FA5';
+            return L.divIcon({
+                className: '',
+                html: `<div style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">
+      <svg xmlns="http://www.w3.org/2000/svg" width="34" height="40" viewBox="0 0 34 40">
+        <path d="M17 0C8.716 0 2 6.716 2 15c0 9.5 15 25 15 25S32 24.5 32 15C32 6.716 25.284 0 17 0z"
+              fill="${bg}" stroke="${stroke}" stroke-width="2"/>
+        <g transform="translate(9,7)" fill="${ic}">
+          <rect x="2" y="8" width="12" height="7" rx="1"/>
+          <polygon points="8,2 16,6 8,10 0,6"/>
+          <line x1="14" y1="6" x2="14" y2="12" stroke="${ic}" stroke-width="1.5"/>
+          <circle cx="14" cy="12.5" r="1.2"/>
+        </g>
+      </svg></div>`,
+                iconSize: [34, 40], iconAnchor: [17, 40], popupAnchor: [0, -42],
+            });
+        }
+
+        function scoreClass(s) {
+            return s > 0.7 ? 'score-high' : s >= 0.4 ? 'score-mid' : 'score-low';
+        }
+        function scoreLabel(s) {
+            return s > 0.7 ? 'Safe' : s >= 0.4 ? 'Moderate' : 'High risk';
+        }
+
+        function drawSchools() {
+            schoolMarkers.forEach(m => m.remove());
+            schoolMarkers = [];
+            if (!showSchools) return;
+
+            SCHOOLS.forEach(school => {
+                const isSelected = selectedSchool && selectedSchool.id === school.id;
+                const marker = L.marker([school.lat, school.lon], {
+                    icon: buildSchoolIcon(isSelected), title: school.name,
+                }).addTo(map);
+
+                const colour = school.dropoutRate > 15 ? '#E24B4A'
+                    : school.dropoutRate > 8 ? '#EF9F27' : '#639922';
+
+                const boysPct = 100 - school.girlsPercent;
+                const popup = `<div style="font-family:'DM Sans',sans-serif;min-width:220px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="background:#E6F1FB;border-radius:8px;padding:6px;font-size:18px;">🏫</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#111;">${school.name}</div>
+          <div style="font-size:11px;color:#9ca3af;">${school.distanceKm} km away</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid #e5e7eb;">
+        <span style="font-size:12px;color:#6b7280;">Enrollment</span>
+        <span style="font-size:13px;font-weight:600;color:#185FA5;">${school.enrollment.toLocaleString()}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid #e5e7eb;">
+        <span style="font-size:12px;color:#6b7280;">Dropout rate</span>
+        <span style="font-size:13px;font-weight:600;color:${colour};">${school.dropoutRate}%</span>
+      </div>
+      <div style="margin:8px 0 4px;">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Gender ratio</div>
+        <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;">
+          <div style="width:${school.girlsPercent}%;background:#D4537E;"></div>
+          <div style="width:${boysPct}%;background:#378ADD;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#6b7280;margin-top:3px;">
+          <span>♀ ${school.girlsPercent}%</span><span>♂ ${boysPct}%</span>
+        </div>
+      </div>
+      <button onclick="window.__srAnalyse('${school.id}')"
+        style="width:100%;margin-top:10px;padding:8px 0;background:#185FA5;color:#fff;
+               border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
+               font-family:'DM Sans',sans-serif;">
+        Analyse routes →
+      </button>
+    </div>`;
+                marker.bindPopup(popup, { maxWidth: 260 });
+                schoolMarkers.push(marker);
+            });
+
+            window.__srAnalyse = (id) => {
+                const school = SCHOOLS.find(s => s.id === id);
+                if (school) selectSchool(school);
+            };
+        }
+
+        /* ── Route Layer ─────────────────────────────── */
+        function colourForScore(s) {
+            return s > 0.7 ? '#22c55e' : s >= 0.4 ? '#f0962a' : '#e84545';
+        }
+
+        function drawRoutes(routes) {
+            routeLayers.forEach(l => l.remove());
+            shadowLayers.forEach(l => l.remove());
+            routeLayers = []; shadowLayers = [];
+            if (!routes || routes.length === 0) return;
+
+            const sorted = [...routes].sort((a, b) => {
+                if (a.isRecommended) return 1;
+                if (b.isRecommended) return -1;
+                return a.safetyScore - b.safetyScore;
+            });
+
+            sorted.forEach(route => {
+                const colour = colourForScore(route.safetyScore);
+                const isRec = route.isRecommended;
+
+                if (isRec) {
+                    const shadow = L.polyline(route.latlngs, {
+                        color: colour, weight: 12, opacity: 0.15, interactive: false,
+                    }).addTo(map);
+                    shadowLayers.push(shadow);
+                }
+
+                const line = L.polyline(route.latlngs, {
+                    color: colour,
+                    weight: isRec ? 5 : 3,
+                    opacity: isRec ? 0.95 : 0.65,
+                    dashArray: isRec ? null : '8 5',
+                    className: isRec ? 'sr-route-rec' : '',
+                    lineCap: 'round',
+                }).addTo(map);
+
+                const tip = `<div style="font-family:'DM Sans',sans-serif;padding:2px 4px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <span style="background:${colour}22;border:1.5px solid ${colour};color:${colour};
+                     font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;">
+          ${scoreLabel(route.safetyScore).toUpperCase()}
+        </span>
+        <span style="font-size:12px;font-weight:600;color:#f1f5f9;">
+          Score: ${(route.safetyScore * 100).toFixed(0)}%
+        </span>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;">⚠ ${route.topRiskFactor}</div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:2px;">
+        ${route.distanceKm} km · ~${route.minutesWalk} min walk
+      </div>
+      ${isRec ? `<div style="font-size:10px;color:${colour};font-weight:700;margin-top:4px;">★ Recommended route</div>` : ''}
+    </div>`;
+                line.bindTooltip(tip, { sticky: true, direction: 'top', offset: [0, -8] });
+                routeLayers.push(line);
+            });
+        }
+
+        /* ── Risk Heatmap ────────────────────────────── */
+        function drawHeatmap() {
+            if (heatLayer) { heatLayer.remove(); heatLayer = null; }
+            if (!showHeatmap) return;
+
+            const data = HEAT_POINTS.map(p => [p.lat, p.lon, p.intensity]);
+            heatLayer = L.heatLayer(data, {
+                radius: 28, blur: 22, maxZoom: 17,
+                gradient: { 0.0: '#22c55e', 0.35: '#f0962a', 0.65: '#e84545', 1.0: '#7f1d1d' },
+                minOpacity: 0.35,
+            }).addTo(map);
+        }
+
+        /* ── Infrastructure Gaps ─────────────────────── */
+        function drawInfra() {
+            infraLayers.forEach(l => l.remove());
+            infraLayers = [];
+            if (!showInfra) return;
+
+            NO_BUS_ROUTES.forEach(seg => {
+                const line = L.polyline(seg.latlngs, {
+                    color: '#E24B4A', weight: 4, opacity: 0.85, dashArray: '12 6', lineCap: 'round',
+                }).addTo(map);
+                line.bindTooltip(`<div style="font-family:'DM Sans',sans-serif;font-size:11px;">
+      <strong style="color:#E24B4A;">No bus stop</strong><br/>${seg.label}</div>`,
+                    { sticky: true });
+                infraLayers.push(line);
+            });
+
+            DEAD_ZONES.forEach(pt => {
+                const icon = L.divIcon({
+                    className: '',
+                    html: `<div style="background:#7c3aed;border-radius:50%;width:28px;height:28px;
+              display:flex;align-items:center;justify-content:center;
+              border:2px solid #fff;box-shadow:0 2px 6px rgba(124,58,237,0.5);font-size:14px;">📵</div>`,
+                    iconSize: [28, 28], iconAnchor: [14, 14],
+                });
+                const m = L.marker([pt.lat, pt.lon], { icon, title: pt.label }).addTo(map);
+                m.bindPopup(`<div style="font-family:'DM Sans',sans-serif;padding:4px;">
+      <div style="font-weight:700;color:#7c3aed;margin-bottom:4px;">📵 Mobile Dead Zone</div>
+      <div style="font-size:12px;color:#374151;">${pt.label}</div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:6px;">Children cannot call for help in emergencies.</div>
+    </div>`, { maxWidth: 220 });
+                infraLayers.push(m);
+            });
+
+            UNLIT_SEGMENTS.forEach(seg => {
+                const line = L.polyline(seg.latlngs, {
+                    color: '#f59e0b', weight: 5, opacity: 0.6, dashArray: '6 4', lineCap: 'round',
+                }).addTo(map);
+                infraLayers.push(line);
+
+                const mid = seg.latlngs[Math.floor(seg.latlngs.length / 2)];
+                const icon = L.divIcon({
+                    className: '',
+                    html: `<div style="background:#f59e0b;border-radius:50%;width:28px;height:28px;
+              display:flex;align-items:center;justify-content:center;
+              border:2px solid #fff;box-shadow:0 2px 6px rgba(245,158,11,0.5);font-size:14px;">🌙</div>`,
+                    iconSize: [28, 28], iconAnchor: [14, 14],
+                });
+                const m = L.marker(mid, { icon, title: seg.label }).addTo(map);
+                m.bindPopup(`<div style="font-family:'DM Sans',sans-serif;padding:4px;">
+      <div style="font-weight:700;color:#b45309;margin-bottom:4px;">🌙 Unlit Segment</div>
+      <div style="font-size:12px;color:#374151;">${seg.label}</div>
+    </div>`, { maxWidth: 220 });
+                infraLayers.push(m);
+            });
+        }
+
+        /* ══════════════════════════════════════════════
+           VIEW MANAGEMENT
+           ══════════════════════════════════════════════ */
+        function selectSchool(school) {
+            selectedSchool = school;
+            drawSchools();
+            if (currentView === 'village') {
+                drawRoutes(school.id === 's1' ? ROUTES_TO_S1 : []);
+                map.flyTo([school.lat, school.lon], 14, { duration: 1.2 });
+            }
+            renderSidebar();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            selectedSchool = null;
+
+            document.getElementById('btn-village').classList.toggle('active', view === 'village');
+            document.getElementById('btn-lawmaker').classList.toggle('active', view === 'lawmaker');
+
+            // Reset tile layer
+            map.eachLayer(l => { if (l instanceof L.TileLayer) l.remove(); });
+            const tileUrl = view === 'lawmaker'
+                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            L.tileLayer(tileUrl, {
+                attribution: view === 'lawmaker'
+                    ? '© OpenStreetMap contributors © CARTO'
+                    : '© OpenStreetMap contributors',
+                maxZoom: 19, subdomains: view === 'lawmaker' ? 'abcd' : 'abc',
+            }).addTo(map);
+
+            map.flyTo(YADAGIRI, 13, { duration: 1 });
+
+            // Reset toggles
+            showHeatmap = true; showInfra = true; showSchools = true;
+
+            // Redraw
+            drawBoundary(false, view === 'lawmaker' ? '#7c3aed' : '#378ADD');
+            drawSchools();
+            drawRoutes([]);
+            drawHeatmap();
+            if (view === 'lawmaker') drawInfra();
+            else { infraLayers.forEach(l => l.remove()); infraLayers = []; }
+
+            renderSidebar();
+            renderLegend();
+        }
+
+        /* ── Sidebar render ──────────────────────────── */
+        function renderSidebar() {
+            const el = document.getElementById('sidebar-content');
+            if (currentView === 'village') {
+                el.innerHTML = `
+      <div class="section-title">Select a school</div>
+      ${SCHOOLS.map(s => `
+        <div class="school-card ${selectedSchool && selectedSchool.id === s.id ? 'active' : ''}"
+             onclick="selectSchool(${JSON.stringify(s).replace(/"/g, '&quot;')})">
+          <div class="school-name">${s.name}</div>
+          <div class="school-meta">${s.enrollment} enrolled · ${s.distanceKm} km</div>
+          <div class="school-score ${scoreClass(s.safetyScore)}">${scoreLabel(s.safetyScore)}</div>
+        </div>`).join('')}
+
+      <div class="section-title" style="margin-top:16px;">Summary stats</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Schools</div>
+          <div class="stat-value">${SCHOOLS.length}</div>
+          <div class="stat-sub">within 7 km</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg dropout</div>
+          <div class="stat-value">${(SCHOOLS.reduce((a, s) => a + s.dropoutRate, 0) / SCHOOLS.length).toFixed(1)}%</div>
+          <div class="stat-sub">across schools</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Risk zones</div>
+          <div class="stat-value">${HEAT_POINTS.filter(p => p.intensity > 0.6).length}</div>
+          <div class="stat-sub">high intensity</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Safe routes</div>
+          <div class="stat-value">${ROUTES_TO_S1.filter(r => r.safetyScore > 0.7).length}</div>
+          <div class="stat-sub">for Zilla Parishad</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="toggle-row">
+          <span class="toggle-label">🔥 Risk heatmap</span>
+          <button class="toggle-sw ${showHeatmap ? 'on' : 'off'}" id="heat-tog"
+            onclick="toggleLayer('heatmap')"></button>
+        </div>
+      </div>`;
+            } else {
+                // Lawmaker
+                const totalGaps = NO_BUS_ROUTES.length + DEAD_ZONES.length + UNLIT_SEGMENTS.length;
+                el.innerHTML = `
+      <div class="section-title">Infrastructure audit</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">No bus stops</div>
+          <div class="stat-value" style="color:#e84545">${NO_BUS_ROUTES.length}</div>
+          <div class="stat-sub">road segments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Dead zones</div>
+          <div class="stat-value" style="color:#a78bfa">${DEAD_ZONES.length}</div>
+          <div class="stat-sub">no mobile signal</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Unlit roads</div>
+          <div class="stat-value" style="color:#f59e0b">${UNLIT_SEGMENTS.length}</div>
+          <div class="stat-sub">segments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total gaps</div>
+          <div class="stat-value">${totalGaps}</div>
+          <div class="stat-sub">need action</div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:16px;">Layer toggles</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="toggle-row">
+          <span class="toggle-label">🔥 Risk heatmap</span>
+          <button class="toggle-sw ${showHeatmap ? 'on' : 'off'}" onclick="toggleLayer('heatmap')"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">⚠ Infra gaps</span>
+          <button class="toggle-sw ${showInfra ? 'on' : 'off'}" onclick="toggleLayer('infra')"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">🏫 Schools</span>
+          <button class="toggle-sw ${showSchools ? 'on' : 'off'}" onclick="toggleLayer('schools')"></button>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:16px;">Schools at risk</div>
+      ${SCHOOLS.filter(s => s.safetyScore < 0.5).map(s => `
+        <div class="school-card" onclick="selectSchool(${JSON.stringify(s).replace(/"/g, '&quot;')})">
+          <div class="school-name">${s.name}</div>
+          <div class="school-meta">Dropout: ${s.dropoutRate}% · ${s.distanceKm} km</div>
+          <div class="school-score ${scoreClass(s.safetyScore)}">${scoreLabel(s.safetyScore)} route</div>
+        </div>`).join('')}`;
+            }
+        }
+
+        function toggleLayer(layer) {
+            if (layer === 'heatmap') { showHeatmap = !showHeatmap; drawHeatmap(); }
+            if (layer === 'infra') {
+                showInfra = !showInfra;
+                drawInfra();
+            }
+            if (layer === 'schools') { showSchools = !showSchools; drawSchools(); }
+            renderSidebar();
+        }
+        window.toggleLayer = toggleLayer;
+        window.selectSchool = (s) => {
+            // Handle stringified school from onclick
+            if (typeof s === 'string') s = JSON.parse(s);
+            selectSchool(s);
+        };
+
+        /* ── Legend render ───────────────────────────── */
+        function renderLegend() {
+            const el = document.getElementById('legend');
+            const isLawmaker = currentView === 'lawmaker';
+            el.innerHTML = `
+    <div class="legend-title">Legend</div>
+    <div class="legend-item">
+      <div class="legend-line" style="background:#22c55e;height:3px;width:22px;border-radius:2px;flex-shrink:0"></div>
+      Safe route (&gt;70%)
+    </div>
+    <div class="legend-item">
+      <div class="legend-line" style="background:#f0962a;height:3px;width:22px;border-radius:2px;flex-shrink:0"></div>
+      Moderate (40–70%)
+    </div>
+    <div class="legend-item">
+      <div class="legend-line" style="background:#e84545;height:3px;width:22px;border-radius:2px;flex-shrink:0"></div>
+      High risk (&lt;40%)
+    </div>
+    <hr class="legend-divider"/>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#185FA5;width:10px;height:10px;border-radius:50%;flex-shrink:0"></div>
+      School
+    </div>
+    <div class="legend-item">
+      <div style="width:14px;height:14px;border:2px dashed ${isLawmaker ? '#7c3aed' : '#378ADD'};border-radius:50%;flex-shrink:0"></div>
+      7 km boundary
+    </div>
+    <hr class="legend-divider"/>
+    <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;font-weight:700;">Risk heatmap</div>
+    <div class="legend-gradient"></div>
+    <div class="legend-sub"><span>Low</span><span>High</span></div>
+    ${isLawmaker ? `
+    <hr class="legend-divider"/>
+    <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;font-weight:700;">Infra gaps</div>
+    <div class="legend-item">
+      <div style="width:22px;height:3px;background:repeating-linear-gradient(90deg,#E24B4A 0 5px,transparent 5px 8px);flex-shrink:0"></div>
+      No bus stop
+    </div>
+    <div class="legend-item"><span style="font-size:16px;line-height:1">📵</span> Dead zone</div>
+    <div class="legend-item"><span style="font-size:16px;line-height:1">🌙</span> Unlit road</div>` : ''}`;
+        }
+
+        /* ── Mobile sidebar ──────────────────────────── */
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+        window.toggleSidebar = toggleSidebar;
+
+        /* ════════════════════════════════════════════════════
+           INIT
+           ════════════════════════════════════════════════════ */
+        window.addEventListener('load', () => {
+            initMap();
+            drawBoundary(true);
+            drawSchools();
+            drawHeatmap();
+            renderSidebar();
+            renderLegend();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+village_name,sub_district,district,village_code,lat,lon,total_population,male_population,female_population,total_households,sc_population,st_population,literate_total,literate_female,data_source,confidence,pop_age_6_17,pop_age_6_17_female,pop_age_6_17_male
+Yadagiri,Yadgir,Yadgir,591040,16.7648,77.1268,4521,2301,2220,912,1120,210,2150,890,Census 2011 (published),High,967,464,503
+Waddapalli,Yadgir,Yadgir,591045,16.781,77.141,1842,937,905,381,412,88,820,312,Census 2011 (published),High,394,189,205
+Malkapuram,Yadgir,Yadgir,591051,16.75,77.11,2103,1071,1032,428,520,115,940,371,Census 2011 (published),High,450,216,234
+Rampur (Yadgir),Yadgir,Yadgir,591058,16.732,77.148,1278,648,630,264,310,72,550,208,Census 2011 (published),High,273,132,141
+Kolur,Yadgir,Yadgir,591062,16.79,77.095,945,479,466,197,230,48,408,152,Census 2011 (estimated),Medium,202,97,105
