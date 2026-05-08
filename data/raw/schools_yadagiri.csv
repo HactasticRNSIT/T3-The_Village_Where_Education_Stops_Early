@@ -1,0 +1,48 @@
+udise_code,school_name,school_category,management,lat,lon,enrollment_total,enrollment_girls,enrollment_boys,dropout_rate_pct,girls_toilet,has_electricity,has_water,distance_to_road_m,gps_review
+292952950,GHPS Yadagiri A,Secondary (I-X),Govt,16.86068,77.24557,154,83,71,1.6,0,1,1,2584,False
+292949906,GHPS Yadagiri B,Primary (I-V),Private Unaided,16.80295,77.10789,60,31,29,2.2,0,1,1,1459,False
+292926224,GHS Yadagiri C,Secondary (I-X),Private Unaided,16.8755,77.20207,210,112,98,2.9,1,1,1,498,False
+292978569,GHS Yadagiri D,Upper Primary (I-VIII),Govt,16.77228,77.29216,193,101,92,6.0,1,1,1,951,False
+292923435,GHPS Yadagiri E,Upper Primary (I-VIII),Private Unaided,16.87935,77.09028,226,113,113,1.4,1,1,1,2389,False
+292930180,GHS Yadagiri F,Higher Secondary (I-XII),Govt,16.77033,77.24329,257,134,123,3.2,1,1,1,3382,False
+292932562,GHS Yadagiri G,Secondary (I-X),Govt Aided,16.67642,77.27327,235,107,128,0.6,1,1,1,1385,False
+292917464,GHS Yadagiri H,Higher Secondary (I-XII),Govt Aided,16.83314,77.25236,93,47,46,10.8,0,1,1,555,False
+292999598,GHPS Kolur I,Primary (I-V),Private Unaided,16.66659,77.15903,222,100,122,6.9,1,1,1,326,False
+292911348,GHS Rampur J,Higher Secondary (I-XII),Private Unaided,16.80069,77.12687,410,189,221,2.4,1,1,1,2530,False
+292932918,GHS Konanoor K,Higher Secondary (I-XII),Govt Aided,16.65091,77.23471,279,142,137,11.2,1,1,1,2428,False
+292995555,GHS Rampur L,Secondary (I-X),Govt,16.80654,77.08664,316,167,149,6.7,1,1,0,2074,False
+292950209,GHS Rampur M,Primary (I-V),Private Unaided,16.71333,77.21073,80,39,41,1.0,0,1,1,1638,False
+292969574,GHPS Waddapalli N,Secondary (I-X),Social Welfare Dept,16.65276,77.18031,201,94,107,6.5,1,1,1,3000,False
+292989693,GHPS Chinna Yadagiri O,Secondary (I-X),Private Unaided,16.72339,77.28245,246,108,138,7.9,1,0,1,262,False
+292991814,GHPS Chinna Yadagiri P,Higher Secondary (I-XII),Govt,16.71015,77.10777,84,44,40,9.7,1,1,1,1549,False
+292970599,GHS Rampur Q,Upper Primary (I-VIII),Govt,16.68132,77.2792,388,199,189,10.1,1,1,1,525,False
+292911775,GHPS Waddapalli R,Secondary (I-X),Govt,16.8616,77.24832,269,118,151,3.4,1,1,1,2349,False
+292981778,GHPS Rampur S,Higher Secondary (I-XII),Govt,16.74137,77.24569,240,110,130,11.6,1,1,0,3269,False
+292964130,GHS Kolur T,Secondary (I-X),Social Welfare Dept,16.66098,77.29747,155,65,90,5.9,1,1,1,600,False
+292926144,GHS Waddapalli U,Higher Secondary (I-XII),Govt Aided,16.76761,77.19169,217,110,107,3.5,1,1,1,2164,False
+292955265,GHS Konanoor V,Upper Primary (I-VIII),Private Unaided,16.77771,77.23325,165,87,78,6.8,1,0,1,3161,False
+292994663,GHPS Chinna Yadagiri W,Secondary (I-X),Govt Aided,16.7172,77.20061,45,23,22,4.8,1,1,1,654,False
+292980375,GHS Rampur X,Higher Secondary (I-XII),Govt,16.8427,77.27258,84,38,46,2.8,1,1,1,2478,False
+292977123,GHPS Konanoor Y,Higher Secondary (I-XII),Govt,16.66323,77.26911,320,167,153,11.0,1,1,1,3370,False
+292928402,GHS Rampur Z,Upper Primary (I-VIII),Private Unaided,16.82826,77.09036,104,48,56,11.3,1,1,1,145,False
+292949018,GHS Rampur A,Higher Secondary (I-XII),Govt,16.70281,77.27257,275,118,157,10.1,1,1,1,1907,False
+292950870,GHS Chinna Yadagiri B,Secondary (I-X),Private Unaided,16.69335,77.09162,72,32,40,5.5,1,1,1,1339,False
+292989439,GHPS Malkapuram C,Upper Primary (I-VIII),Govt,16.76147,77.16098,308,147,161,8.7,0,1,1,1437,False
+292927864,GHPS Rampur D,Secondary (I-X),Govt,16.71274,77.11325,343,175,168,10.3,1,1,1,1258,False
+292919959,GHS Chinna Yadagiri E,Primary (I-V),Private Unaided,16.80107,77.19732,254,129,125,1.4,1,0,1,1132,False
+292960487,GHPS Kolur F,Secondary (I-X),Private Unaided,16.66625,77.19609,263,119,144,5.2,1,1,1,913,False
+292986581,GHS Nagapur G,Secondary (I-X),Private Unaided,16.86133,77.0551,253,133,120,7.9,1,1,1,3245,False
+292923462,GHS Kolur H,Upper Primary (I-VIII),Private Unaided,16.82839,77.28715,274,144,130,11.7,1,0,1,865,False
+292974306,GHS Malkapuram I,Upper Primary (I-VIII),Govt,16.68994,77.08319,87,37,50,8.6,1,1,1,3281,False
+292944408,GHS Nagapur J,Secondary (I-X),Govt Aided,16.73135,77.05282,42,22,20,7.8,1,1,0,1609,False
+292910874,GHPS Malkapuram K,Higher Secondary (I-XII),Private Unaided,16.87079,77.12141,98,44,54,2.9,1,1,1,1143,False
+292993936,GHS Waddapalli L,Upper Primary (I-VIII),Govt,16.77304,77.189,185,86,99,3.9,1,1,0,1985,False
+292969299,GHS Waddapalli M,Higher Secondary (I-XII),Govt,16.82099,77.12253,302,130,172,2.3,1,1,1,2277,False
+292988785,GHPS Chinna Yadagiri N,Secondary (I-X),Govt,16.67612,77.17311,264,122,142,4.0,1,1,1,2608,False
+292911508,GHPS Chinna Yadagiri O,Higher Secondary (I-XII),Private Unaided,16.67891,77.2504,194,93,101,8.8,1,1,1,1384,False
+292961477,GHPS Nagapur P,Primary (I-V),Private Unaided,16.6815,77.06007,380,180,200,11.5,0,1,1,1438,False
+292941468,GHS Rampur Q,Primary (I-V),Govt,16.77542,77.09099,44,21,23,0.7,1,1,1,1356,False
+292952772,GHS Nagapur R,Upper Primary (I-VIII),Private Unaided,16.65761,77.22089,303,157,146,4.1,1,1,0,955,False
+292905590,GHS Chinna Yadagiri S,Primary (I-V),Social Welfare Dept,16.76793,77.26165,203,91,112,1.1,0,0,1,170,False
+292935310,GHS Kolur T,Secondary (I-X),Govt Aided,16.73723,77.216,286,122,164,10.6,1,1,1,1072,False
+292973131,GHPS Kolur U,Upper Primary (I-VIII),Govt Aided,16.7314,77.25137,165,83,82,8.5,1,1,0,3286,False
