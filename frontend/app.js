@@ -1,4 +1,6 @@
 /* SafeRoute AI — Frontend Application */
+import html2pdf from 'html2pdf.js';
+
 const API = 'http://localhost:8000';
 
 // ── State ──
@@ -395,8 +397,17 @@ function renderVillageReport(data) {
       `).join('')}
     </div>
 
-    <div style="text-align:right;margin-top:16px;font-size:0.75rem;color:var(--text-muted)">
-      <span data-i18n="lbl_confidence">Confidence:</span> ${pct(data.confidence_score)} · <span data-i18n="lbl_generated">Generated:</span> ${new Date(data.generated_at).toLocaleString()}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px">
+      <div style="font-size:0.75rem;color:var(--text-muted)">
+        <span data-i18n="lbl_confidence">Confidence:</span> ${pct(data.confidence_score)} · <span data-i18n="lbl_generated">Generated:</span> ${new Date(data.generated_at).toLocaleString()}
+      </div>
+      <button class="btn btn-primary" onclick="downloadPDF('village-results', 'SafeRoute_Village_Report_${data.village}')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download PDF
+      </button>
     </div>
   `;
   if (window.changeLanguage) window.changeLanguage(document.documentElement.lang || 'en');
@@ -532,8 +543,17 @@ function renderSchoolAnalysis(data) {
 
     ${data.budget_estimate ? renderBudgetEstimator(data.budget_estimate) : ''}
 
-    <div style="text-align:right;font-size:0.75rem;color:var(--text-muted)">
-      <span data-i18n="lbl_confidence">Confidence:</span> ${pct(data.confidence_score)} · ${new Date(data.generated_at).toLocaleString()}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px">
+      <div style="font-size:0.75rem;color:var(--text-muted)">
+        <span data-i18n="lbl_confidence">Confidence:</span> ${pct(data.confidence_score)} · ${new Date(data.generated_at).toLocaleString()}
+      </div>
+      <button class="btn btn-primary" onclick="downloadPDF('school-analysis-results', 'SafeRoute_School_Analysis_${data.school_name.replace(/[^a-zA-Z0-9]/g, '_')}')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download PDF
+      </button>
     </div>
   `;
   if (window.changeLanguage) window.changeLanguage(document.documentElement.lang || 'en');
@@ -680,3 +700,60 @@ function setVillage(name) {
 
 window.setLocation = setLocation;
 window.setVillage = setVillage;
+
+// ── PDF Download ──
+function downloadPDF(containerId, filename) {
+  const element = document.getElementById(containerId);
+  if (!element) { showToast('Nothing to export yet.', 'error'); return; }
+
+  showToast('Generating PDF...', 'info');
+
+  // 1. Inject a branded header at the top of the live element
+  const header = document.createElement('div');
+  header.id = 'pdf-header-temp';
+  header.style.cssText = 'padding:24px 0 16px;border-bottom:2px solid #1A6B3C;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center';
+  header.innerHTML = `
+    <div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:#1A6B3C">SafeRoute AI</div>
+      <div style="font-size:0.75rem;color:#8A8A8A">Student Commute Safety · Yadagiri, Karnataka</div>
+    </div>
+    <div style="text-align:right;font-size:0.7rem;color:#8A8A8A">
+      Generated: ${new Date().toLocaleString()}
+    </div>
+  `;
+  element.prepend(header);
+
+  // 2. Hide the download button so it doesn't appear in the PDF
+  const downloadBtns = element.querySelectorAll('button');
+  const hiddenBtns = [];
+  downloadBtns.forEach(btn => {
+    if (btn.textContent.includes('Download PDF')) {
+      btn.style.display = 'none';
+      hiddenBtns.push(btn);
+    }
+  });
+
+  // 3. Generate the PDF from the visible, on-screen element
+  const opt = {
+    margin:       [10, 12, 10, 12],
+    filename:     `${filename}.pdf`,
+    image:        { type: 'jpeg', quality: 0.95 },
+    html2canvas:  { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
+  };
+
+  html2pdf().set(opt).from(element).save().then(() => {
+    // 4. Cleanup: remove header, restore buttons
+    header.remove();
+    hiddenBtns.forEach(btn => btn.style.display = '');
+    showToast('PDF downloaded successfully!', 'success');
+  }).catch(err => {
+    header.remove();
+    hiddenBtns.forEach(btn => btn.style.display = '');
+    console.error('PDF generation failed:', err);
+    showToast('PDF generation failed. Try again.', 'error');
+  });
+}
+
+window.downloadPDF = downloadPDF;

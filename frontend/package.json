@@ -18,5 +18,8 @@
     "postcss": "^8.5.14",
     "tailwindcss": "^4.3.0",
     "vite": "^8.0.11"
+  },
+  "dependencies": {
+    "html2pdf.js": "^0.14.0"
   }
 }
