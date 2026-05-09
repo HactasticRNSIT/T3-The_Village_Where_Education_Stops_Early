@@ -48,62 +48,62 @@
     </nav>
 
     <!-- ============ HERO SECTION ============ -->
-    <section class="hero" id="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient"></div>
-            <div class="hero-grid"></div>
+    <section class="hero relative min-h-screen flex items-center justify-center text-center overflow-hidden pt-32 pb-20" id="hero">
+        <div class="hero-bg absolute inset-0 z-0">
+            <div class="hero-gradient absolute inset-0"></div>
+            <div class="hero-grid absolute inset-0 opacity-5"></div>
             <div class="hero-particles" id="hero-particles"></div>
         </div>
-        <div class="hero-content">
-            <div class="hero-badge" data-i18n="hero_badge">
+        <div class="hero-content relative z-10 max-w-4xl mx-auto px-4">
+            <div class="hero-badge inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold text-green-800 bg-green-100 border border-green-200 mb-7 animate-fade-in-up" data-i18n="hero_badge">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
                 AI-Powered Safety Scoring
             </div>
-            <h1 class="hero-title">
+            <h1 class="hero-title text-5xl md:text-7xl font-extrabold leading-tight mb-6 text-gray-900 drop-shadow-sm">
                 <span data-i18n="hero_title_1">Every Child Deserves a</span>
-                <span class="gradient-text" data-i18n="hero_title_2">Safe Route</span>
+                <span class="gradient-text bg-clip-text text-transparent bg-gradient-to-r from-green-700 to-green-500" data-i18n="hero_title_2">Safe Route</span>
                 <span data-i18n="hero_title_3">to School</span>
             </h1>
-            <p class="hero-subtitle" data-i18n="hero_subtitle">
+            <p class="hero-subtitle text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up" data-i18n="hero_subtitle">
                 Combining road quality, terrain analysis, weather patterns, crime data & population density 
                 to help students in Yadagiri, Karnataka find the safest commute routes.
             </p>
-            <div class="hero-actions">
-                <a href="#route-analyzer" class="btn btn-primary btn-lg">
+            <div class="hero-actions flex flex-wrap gap-4 justify-center mb-16 animate-fade-in-up">
+                <a href="#route-analyzer" class="btn btn-primary btn-lg inline-flex items-center gap-2 px-8 py-4 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <polygon points="10 8 16 12 10 16 10 8"/>
                     </svg>
                     <span data-i18n="btn_analyze">Analyze Routes</span>
                 </a>
-                <a href="#school-finder" class="btn btn-outline btn-lg">
+                <a href="#school-finder" class="btn btn-outline btn-lg inline-flex items-center gap-2 px-8 py-4 bg-transparent border-2 border-gray-300 hover:border-green-700 hover:text-green-700 text-gray-800 font-semibold rounded-lg transition-all">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                     </svg>
                     <span data-i18n="btn_find_schools">Find Schools</span>
                 </a>
             </div>
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <span class="stat-value" id="stat-schools">8</span>
-                    <span class="stat-label">Schools Mapped</span>
+            <div class="hero-stats flex flex-wrap justify-center items-center gap-8 md:gap-16 pt-8 border-t border-gray-200 mt-8 animate-fade-in-up">
+                <div class="stat-item flex flex-col items-center">
+                    <span class="stat-value text-3xl font-bold text-green-700" id="stat-schools">8</span>
+                    <span class="stat-label text-xs uppercase tracking-wider text-gray-500 font-medium mt-1">Schools Mapped</span>
                 </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-value">6</span>
-                    <span class="stat-label">Safety Factors</span>
+                <div class="stat-divider hidden md:block w-px h-12 bg-gray-200"></div>
+                <div class="stat-item flex flex-col items-center">
+                    <span class="stat-value text-3xl font-bold text-green-700">6</span>
+                    <span class="stat-label text-xs uppercase tracking-wider text-gray-500 font-medium mt-1">Safety Factors</span>
                 </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-value">3</span>
-                    <span class="stat-label">Route Options</span>
+                <div class="stat-divider hidden md:block w-px h-12 bg-gray-200"></div>
+                <div class="stat-item flex flex-col items-center">
+                    <span class="stat-value text-3xl font-bold text-green-700">3</span>
+                    <span class="stat-label text-xs uppercase tracking-wider text-gray-500 font-medium mt-1">Route Options</span>
                 </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-value" id="stat-confidence">92%</span>
-                    <span class="stat-label">Max Confidence</span>
+                <div class="stat-divider hidden md:block w-px h-12 bg-gray-200"></div>
+                <div class="stat-item flex flex-col items-center">
+                    <span class="stat-value text-3xl font-bold text-green-700" id="stat-confidence">92%</span>
+                    <span class="stat-label text-xs uppercase tracking-wider text-gray-500 font-medium mt-1">Max Confidence</span>
                 </div>
             </div>
         </div>
@@ -391,7 +391,7 @@
 
     <!-- ============ SCRIPTS ============ -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="translations.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="translations.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>

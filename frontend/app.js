@@ -519,3 +519,6 @@ function setLocation(lat, lon, name) {
 function setVillage(name) {
   document.getElementById('village-name').value = name;
 }
+
+window.setLocation = setLocation;
+window.setVillage = setVillage;
