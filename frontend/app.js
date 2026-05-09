@@ -113,9 +113,25 @@ async function handleRouteAnalyze(e) {
     });
     if (!r.ok) throw new Error((await r.json()).detail || 'Request failed');
     const data = await r.json();
+    
+    // Cache the result for offline mode
+    localStorage.setItem('cached_route_data', JSON.stringify({ body, data, timestamp: Date.now() }));
+    
     renderRouteResults(data, body);
     showToast(`Analyzed ${data.schools_found} schools, ${data.routes_per_school.length * 3} routes`, 'success');
   } catch (err) {
+    // Check for cached data in case of offline/failure
+    const cached = localStorage.getItem('cached_route_data');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        showToast('Offline Mode: Showing last cached route analysis.', 'warning');
+        renderRouteResults(parsed.data, parsed.body);
+        return;
+      } catch (e) {
+        console.error('Cache parsing failed', e);
+      }
+    }
     showToast(err.message, 'error');
   } finally {
     setLoading(btn, false);
@@ -227,9 +243,23 @@ async function handleSchoolSearch(e) {
     const r = await fetch(`${API}/api/schools/boundary?lat=${lat}&lon=${lon}&radius_km=${radius}`);
     if (!r.ok) throw new Error('Request failed');
     const data = await r.json();
+    
+    localStorage.setItem('cached_school_search', JSON.stringify({ query: { lat: parseFloat(lat), lon: parseFloat(lon), radius: parseFloat(radius) }, data, timestamp: Date.now() }));
+    
     renderSchoolResults(data, { lat: parseFloat(lat), lon: parseFloat(lon), radius: parseFloat(radius) });
     showToast(`Found ${data.features.length} schools`, 'success');
   } catch (err) {
+    const cached = localStorage.getItem('cached_school_search');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        showToast('Offline Mode: Showing last cached school search.', 'warning');
+        renderSchoolResults(parsed.data, parsed.query);
+        return;
+      } catch (e) {
+        console.error('Cache parsing failed', e);
+      }
+    }
     showToast(err.message, 'error');
   } finally {
     setLoading(btn, false);
@@ -297,9 +327,23 @@ async function handleVillageReport(e) {
     const r = await fetch(`${API}/api/lawmaker/village-report?village_name=${encodeURIComponent(name)}`);
     if (!r.ok) { const d = await r.json(); throw new Error(d.detail || 'Not found'); }
     const data = await r.json();
+    
+    localStorage.setItem('cached_village_report', JSON.stringify({ data, timestamp: Date.now() }));
+    
     renderVillageReport(data);
     showToast(`Report for ${data.village} generated`, 'success');
   } catch (err) {
+    const cached = localStorage.getItem('cached_village_report');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        showToast('Offline Mode: Showing last cached village report.', 'warning');
+        renderVillageReport(parsed.data);
+        return;
+      } catch (e) {
+        console.error('Cache parsing failed', e);
+      }
+    }
     showToast(err.message, 'error');
   } finally {
     setLoading(btn, false);
@@ -371,9 +415,23 @@ async function handleSchoolAnalysis(e) {
     });
     if (!r.ok) throw new Error((await r.json()).detail || 'Failed');
     const data = await r.json();
+    
+    localStorage.setItem('cached_school_analysis', JSON.stringify({ data, timestamp: Date.now() }));
+    
     renderSchoolAnalysis(data);
     showToast(`Analysis for ${data.school_name} complete`, 'success');
   } catch (err) {
+    const cached = localStorage.getItem('cached_school_analysis');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        showToast('Offline Mode: Showing last cached school analysis.', 'warning');
+        renderSchoolAnalysis(parsed.data);
+        return;
+      } catch (e) {
+        console.error('Cache parsing failed', e);
+      }
+    }
     showToast(err.message, 'error');
   } finally {
     setLoading(btn, false);
