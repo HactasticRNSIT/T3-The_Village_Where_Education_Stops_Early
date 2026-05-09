@@ -93,7 +93,7 @@ function initNavScroll() {
         link.classList.add('active');
       }
     });
-    document.getElementById('navbar').style.boxShadow = window.scrollY > 50 ? '0 4px 30px rgba(0,0,0,0.3)' : 'none';
+    document.getElementById('navbar').style.boxShadow = window.scrollY > 50 ? '0 2px 12px rgba(120,100,70,0.1)' : 'none';
   });
 }
 
@@ -155,10 +155,10 @@ function renderRouteResults(data, origin) {
         </div>
         ${scoreBadge(s.best_route.safety_score)}
       </div>
-      <div class="detail-row"><span class="detail-label">Best Route</span><span class="detail-value">${s.best_route.route_id.slice(0, 8)}</span></div>
-      <div class="detail-row"><span class="detail-label">Distance</span><span class="detail-value">${s.best_route.distance_km} km</span></div>
-      <div class="detail-row"><span class="detail-label">Confidence</span><span class="detail-value">${pct(s.best_route.confidence)}</span></div>
-      <div class="detail-row"><span class="detail-label">Alt. Score</span><span class="detail-value">${pct(s.alternative_route.safety_score)}</span></div>
+      <div class="detail-row"><span class="detail-label" data-i18n="lbl_best_route">Best Route</span><span class="detail-value">${s.best_route.route_id.slice(0, 8)}</span></div>
+      <div class="detail-row"><span class="detail-label" data-i18n="lbl_distance">Distance</span><span class="detail-value">${s.best_route.distance_km} km</span></div>
+      <div class="detail-row"><span class="detail-label" data-i18n="lbl_confidence">Confidence</span><span class="detail-value">${pct(s.best_route.confidence)}</span></div>
+      <div class="detail-row"><span class="detail-label" data-i18n="lbl_alt_score">Alt. Score</span><span class="detail-value">${pct(s.alternative_route.safety_score)}</span></div>
       <p style="margin-top:12px;font-size:0.8rem;color:var(--text-secondary)">${s.best_route.explanation}</p>
       ${s.best_route.women_safety_warning ? `<div class="safety-warning" style="margin-top:8px">${s.best_route.women_safety_warning}</div>` : ''}
     </div>
@@ -169,7 +169,7 @@ function renderRouteResults(data, origin) {
   routeLayers = [];
 
   const originMarker = L.marker([origin.origin_lat, origin.origin_lon], {
-    icon: L.divIcon({ className: '', html: '<div style="width:14px;height:14px;background:#6366f1;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })
+    icon: L.divIcon({ className: '', html: '<div style="width:14px;height:14px;background:#1A6B3C;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.2)"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })
   }).addTo(routeMap).bindPopup('Your Location');
   routeLayers.push(originMarker);
 
@@ -180,7 +180,7 @@ function renderRouteResults(data, origin) {
     if (!feat || !feat.geometry) return;
     const coords = feat.geometry.coordinates.map(c => [c[1], c[0]]);
     const score = s.best_route.safety_score;
-    const color = score >= 0.65 ? '#22c55e' : score >= 0.45 ? '#f59e0b' : '#ef4444';
+    const color = score >= 0.65 ? '#22c55e' : score >= 0.45 ? '#D4852A' : '#C0392B';
     const line = L.polyline(coords, { color, weight: 4, opacity: 0.8 }).addTo(routeMap);
     line.bindPopup(`<b>${s.school_name}</b><br>Safety: ${pct(score)}`);
     routeLayers.push(line);
@@ -197,19 +197,20 @@ function renderRouteResults(data, origin) {
 
   routeMap.fitBounds(bounds, { padding: [40, 40] });
   results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (window.changeLanguage) window.changeLanguage(document.documentElement.lang || 'en');
 }
 
 function renderShapBars(shap) {
   const maxVal = Math.max(...Object.values(shap), 0.01);
   const labels = { road_quality: 'Road Quality', terrain_safety: 'Terrain', weather_safety: 'Weather', crime_safety: 'Crime Safety', population_density: 'Pop. Density', public_transport: 'Transit' };
-  const colors = { road_quality: '#3b82f6', terrain_safety: '#22c55e', weather_safety: '#06b6d4', crime_safety: '#ef4444', population_density: '#f59e0b', public_transport: '#8b5cf6' };
+  const colors = { road_quality: '#2E6B8A', terrain_safety: '#22c55e', weather_safety: '#3A8C6E', crime_safety: '#C0392B', population_density: '#D4852A', public_transport: '#1A6B3C' };
   return `<div style="margin-top:20px"><h4 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px">Safety Factor Contributions</h4>
     ${Object.entries(shap).map(([k, v]) => `
       <div style="margin-bottom:8px">
         <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:3px">
           <span style="color:var(--text-secondary)">${labels[k] || k}</span><span style="font-weight:600">${(v * 100).toFixed(1)}%</span>
         </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${(v / maxVal) * 100}%;background:${colors[k] || '#6366f1'}"></div></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${(v / maxVal) * 100}%;background:${colors[k] || '#1A6B3C'}"></div></div>
       </div>
     `).join('')}</div>`;
 }
@@ -253,10 +254,10 @@ function renderSchoolResults(data, query) {
         </div>
         ${scoreBadge(1 - needScore)}
       </div>
-      <div class="detail-row"><span class="detail-label">Students</span><span class="detail-value">${p.students}</span></div>
-      <div class="detail-row"><span class="detail-label">Distance</span><span class="detail-value">${p.distance_km} km</span></div>
-      <div class="detail-row"><span class="detail-label">Need Score</span><span class="detail-value">${(needScore * 100).toFixed(1)}%</span></div>
-      <div class="detail-row"><span class="detail-label">Facilities</span><span class="detail-value">${(p.facilities || []).join(', ') || 'N/A'}</span></div>
+      <div class="detail-row"><span class="detail-label" data-i18n="lbl_students">Students</span><span class="detail-value">${p.students}</span></div>
+      <div class="detail-row"><span class="detail-label" data-i18n="lbl_distance">Distance</span><span class="detail-value">${p.distance_km} km</span></div>
+      <div class="detail-row"><span class="detail-label" data-i18n="lbl_need_score">Need Score</span><span class="detail-value">${(needScore * 100).toFixed(1)}%</span></div>
+      <div class="detail-row"><span class="detail-label" data-i18n="lbl_facilities">Facilities</span><span class="detail-value">${(p.facilities || []).join(', ') || 'N/A'}</span></div>
     </div>`;
   }).join('');
 
@@ -266,7 +267,7 @@ function renderSchoolResults(data, query) {
   const bounds = L.latLngBounds();
 
   // Search area circle
-  const circle = L.circle([query.lat, query.lon], { radius: query.radius * 1000, color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.05, weight: 1 }).addTo(schoolMap);
+  const circle = L.circle([query.lat, query.lon], { radius: query.radius * 1000, color: '#1A6B3C', fillColor: '#1A6B3C', fillOpacity: 0.05, weight: 1 }).addTo(schoolMap);
   schoolMarkers.push(circle);
   bounds.extend(circle.getBounds());
 
@@ -274,7 +275,7 @@ function renderSchoolResults(data, query) {
     const [lon, lat] = f.geometry.coordinates;
     const p = f.properties;
     const need = p.need_score || 0;
-    const color = need > 0.6 ? '#ef4444' : need > 0.4 ? '#f59e0b' : '#22c55e';
+    const color = need > 0.6 ? '#C0392B' : need > 0.4 ? '#D4852A' : '#22c55e';
     const m = L.circleMarker([lat, lon], { radius: 8, fillColor: color, fillOpacity: 0.8, color: '#fff', weight: 2 })
       .addTo(schoolMap)
       .bindPopup(`<b>${p.name}</b><br>${p.type} · ${p.students} students<br>Need: ${(need * 100).toFixed(1)}%`);
@@ -283,6 +284,7 @@ function renderSchoolResults(data, query) {
   });
 
   schoolMap.fitBounds(bounds, { padding: [30, 30] });
+  if (window.changeLanguage) window.changeLanguage(document.documentElement.lang || 'en');
 }
 
 // ── Village Report ──
@@ -311,15 +313,15 @@ function renderVillageReport(data) {
 
   results.innerHTML = `
     <div class="village-summary">
-      <div class="summary-card"><div class="value">${s.total_schools}</div><div class="label">Total Schools</div></div>
-      <div class="summary-card"><div class="value">${s.total_students_served}</div><div class="label">Students Served</div></div>
-      <div class="summary-card"><div class="value">${s.government_schools}</div><div class="label">Govt Schools</div></div>
-      <div class="summary-card"><div class="value">${(s.avg_need_score * 100).toFixed(0)}%</div><div class="label">Avg Need Score</div></div>
-      <div class="summary-card"><div class="value">${s.high_need_schools}</div><div class="label">High Need</div></div>
+      <div class="summary-card"><div class="value">${s.total_schools}</div><div class="label" data-i18n="lbl_total_schools">Total Schools</div></div>
+      <div class="summary-card"><div class="value">${s.total_students_served}</div><div class="label" data-i18n="lbl_students_served">Students Served</div></div>
+      <div class="summary-card"><div class="value">${s.government_schools}</div><div class="label" data-i18n="lbl_govt_schools">Govt Schools</div></div>
+      <div class="summary-card"><div class="value">${(s.avg_need_score * 100).toFixed(0)}%</div><div class="label" data-i18n="lbl_avg_need">Avg Need Score</div></div>
+      <div class="summary-card"><div class="value">${s.high_need_schools}</div><div class="label" data-i18n="lbl_high_need">High Need</div></div>
     </div>
 
     <div class="analysis-section">
-      <h4>🏫 Schools Ranked by Need</h4>
+      <h4 data-i18n="lbl_schools_ranked">🏫 Schools Ranked by Need</h4>
       <div class="results-grid">
         ${data.schools_ranked_by_need.map(school => `
           <div class="report-card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:24px">
@@ -334,7 +336,7 @@ function renderVillageReport(data) {
               ${school.top_issues.map(i => `<span class="issue-tag ${i.severity}">${i.issue} · ${i.metric}</span>`).join(' ')}
             </div>
             <div style="margin-top:12px">
-              <div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:8px">INTERVENTIONS</div>
+              <div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:8px" data-i18n="lbl_interventions_upper">INTERVENTIONS</div>
               ${school.interventions.map(iv => `<div class="intervention-item">• ${iv}</div>`).join('')}
             </div>
           </div>
@@ -343,16 +345,17 @@ function renderVillageReport(data) {
     </div>
 
     <div class="analysis-section">
-      <h4>🎯 Top Recommended Interventions</h4>
+      <h4 data-i18n="lbl_top_interventions">🎯 Top Recommended Interventions</h4>
       ${data.recommended_interventions.map((iv, i) => `
         <div class="intervention-item"><strong>${i + 1}.</strong> ${iv}</div>
       `).join('')}
     </div>
 
     <div style="text-align:right;margin-top:16px;font-size:0.75rem;color:var(--text-muted)">
-      Confidence: ${pct(data.confidence_score)} · Generated: ${new Date(data.generated_at).toLocaleString()}
+      <span data-i18n="lbl_confidence">Confidence:</span> ${pct(data.confidence_score)} · <span data-i18n="lbl_generated">Generated:</span> ${new Date(data.generated_at).toLocaleString()}
     </div>
   `;
+  if (window.changeLanguage) window.changeLanguage(document.documentElement.lang || 'en');
 }
 
 // ── School Analysis ──
@@ -386,39 +389,39 @@ function renderSchoolAnalysis(data) {
     <div class="result-hero-card">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px">
         <div>
-          <span class="section-tag">📊 School Analysis</span>
+          <span class="section-tag" data-i18n="lbl_school_analysis">📊 School Analysis</span>
           <h3>${data.school_name}</h3>
           <p class="meta">Location: ${data.location.lat}, ${data.location.lon}</p>
         </div>
         <div style="text-align:center">
           ${scoreBadge(1 - need.need_score, true)}
-          <div style="margin-top:6px;font-size:0.75rem;color:var(--text-muted)">Need: ${pct(need.need_score)}</div>
+          <div style="margin-top:6px;font-size:0.75rem;color:var(--text-muted)"><span data-i18n="lbl_need">Need:</span> ${pct(need.need_score)}</div>
         </div>
       </div>
     </div>
 
     <div class="village-summary">
-      <div class="summary-card"><div class="value">${pct(need.crime_risk)}</div><div class="label">Crime Risk</div></div>
-      <div class="summary-card"><div class="value">${pct(need.pop_density)}</div><div class="label">Pop Density</div></div>
-      <div class="summary-card"><div class="value">${pct(need.weather_risk)}</div><div class="label">Weather Risk</div></div>
-      <div class="summary-card"><div class="value">${need.n_facilities}/6</div><div class="label">Facilities</div></div>
-      <div class="summary-card"><div class="value">${need.students}</div><div class="label">Students</div></div>
+      <div class="summary-card"><div class="value">${pct(need.crime_risk)}</div><div class="label" data-i18n="lbl_crime_risk">Crime Risk</div></div>
+      <div class="summary-card"><div class="value">${pct(need.pop_density)}</div><div class="label" data-i18n="lbl_pop_density">Pop Density</div></div>
+      <div class="summary-card"><div class="value">${pct(need.weather_risk)}</div><div class="label" data-i18n="lbl_weather_risk">Weather Risk</div></div>
+      <div class="summary-card"><div class="value">${need.n_facilities}/6</div><div class="label" data-i18n="lbl_facilities">Facilities</div></div>
+      <div class="summary-card"><div class="value">${need.students}</div><div class="label" data-i18n="lbl_students">Students</div></div>
     </div>
 
     <div class="analysis-section">
-      <h4>🛣️ Route Problems (${data.route_problems.total_routes_analysed} routes analyzed)</h4>
+      <h4 data-i18n="lbl_route_problems">🛣️ Route Problems (${data.route_problems.total_routes_analysed} routes analyzed)</h4>
       ${data.route_problems.summary.length ? data.route_problems.summary.map(rp => `
         <div class="fix-card">
-          <div class="detail-row"><span class="detail-label">Time</span><span class="detail-value">${rp.travel_time}</span></div>
-          <div class="detail-row"><span class="detail-label">Safety</span><span class="detail-value">${pct(rp.overall_safety)}</span></div>
-          <div class="detail-row"><span class="detail-label">Problem Segments</span><span class="detail-value">${rp.n_problem_segments}</span></div>
+          <div class="detail-row"><span class="detail-label" data-i18n="lbl_time">Time</span><span class="detail-value">${rp.travel_time}</span></div>
+          <div class="detail-row"><span class="detail-label" data-i18n="lbl_safety">Safety</span><span class="detail-value">${pct(rp.overall_safety)}</span></div>
+          <div class="detail-row"><span class="detail-label" data-i18n="lbl_problem_segments">Problem Segments</span><span class="detail-value">${rp.n_problem_segments}</span></div>
           <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:8px">${rp.explanation}</p>
         </div>
       `).join('') : '<p style="color:var(--text-muted)">No significant route problems detected.</p>'}
     </div>
 
     <div class="analysis-section">
-      <h4>⛰️ Terrain Issues</h4>
+      <h4 data-i18n="lbl_terrain_issues">⛰️ Terrain Issues</h4>
       ${data.terrain_issues.map(t => `
         <div class="fix-card">
           <div class="fix-text">${t.issue}</div>
@@ -429,13 +432,13 @@ function renderSchoolAnalysis(data) {
     </div>
 
     <div class="analysis-section">
-      <h4>🌦️ Seasonal Weather Patterns</h4>
+      <h4 data-i18n="lbl_seasonal_weather">🌦️ Seasonal Weather Patterns</h4>
       <div class="weather-grid">
         ${data.weather_patterns.map(w => `
           <div class="weather-card">
             <div class="season">${w.season}</div>
-            <div class="detail-row"><span class="detail-label">Morning Risk</span><span class="detail-value">${(w.morning_risk * 100).toFixed(0)}%</span></div>
-            <div class="detail-row"><span class="detail-label">Evening Risk</span><span class="detail-value">${(w.evening_risk * 100).toFixed(0)}%</span></div>
+            <div class="detail-row"><span class="detail-label" data-i18n="lbl_morning_risk">Morning Risk</span><span class="detail-value">${(w.morning_risk * 100).toFixed(0)}%</span></div>
+            <div class="detail-row"><span class="detail-label" data-i18n="lbl_evening_risk">Evening Risk</span><span class="detail-value">${(w.evening_risk * 100).toFixed(0)}%</span></div>
             <div class="concern">${w.concern}</div>
           </div>
         `).join('')}
@@ -444,12 +447,12 @@ function renderSchoolAnalysis(data) {
 
     ${data.crime_hotspots.length ? `
     <div class="analysis-section">
-      <h4>🔴 Crime Hotspots Nearby</h4>
+      <h4 data-i18n="lbl_crime_hotspots">🔴 Crime Hotspots Nearby</h4>
       <div class="results-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
         ${data.crime_hotspots.map(h => `
           <div class="fix-card">
             <span class="issue-tag ${h.severity === 'high' ? 'critical' : 'high'}">${h.severity}</span>
-            <div class="detail-row"><span class="detail-label">Risk</span><span class="detail-value">${pct(h.crime_risk)}</span></div>
+            <div class="detail-row"><span class="detail-label" data-i18n="lbl_risk">Risk</span><span class="detail-value">${pct(h.crime_risk)}</span></div>
             <div style="font-size:0.72rem;color:var(--text-muted)">${h.lat}, ${h.lon}</div>
           </div>
         `).join('')}
@@ -457,7 +460,7 @@ function renderSchoolAnalysis(data) {
     </div>` : ''}
 
     <div class="analysis-section">
-      <h4>🔧 Suggested Fixes</h4>
+      <h4 data-i18n="lbl_suggested_fixes">🔧 Suggested Fixes</h4>
       ${data.suggested_fixes.map(f => `
         <div class="fix-card">
           <div class="fix-text">${f.fix}</div>
@@ -470,17 +473,19 @@ function renderSchoolAnalysis(data) {
     </div>
 
     <div style="text-align:right;font-size:0.75rem;color:var(--text-muted)">
-      Confidence: ${pct(data.confidence_score)} · ${new Date(data.generated_at).toLocaleString()}
+      <span data-i18n="lbl_confidence">Confidence:</span> ${pct(data.confidence_score)} · ${new Date(data.generated_at).toLocaleString()}
     </div>
   `;
+  if (window.changeLanguage) window.changeLanguage(document.documentElement.lang || 'en');
 }
 
 // ── Helpers ──
 function scoreBadge(score, large) {
   const cls = score >= 0.65 ? 'safe' : score >= 0.45 ? 'moderate' : 'risky';
+  const labelKey = score >= 0.65 ? 'badge_safe' : score >= 0.45 ? 'badge_mod' : 'badge_risk';
   const label = score >= 0.65 ? 'Safe' : score >= 0.45 ? 'Moderate' : 'Risky';
   const sz = large ? 'font-size:1.3rem;padding:10px 22px' : '';
-  return `<span class="score-badge ${cls}" style="${sz}">${(score * 100).toFixed(0)}% ${label}</span>`;
+  return `<span class="score-badge ${cls}" style="${sz}">${(score * 100).toFixed(0)}% <span data-i18n="${labelKey}">${label}</span></span>`;
 }
 
 function pct(v) { return (v * 100).toFixed(1) + '%'; }
