@@ -341,6 +341,245 @@ def _get_interventions(need_data: Dict, school: Dict) -> List[str]:
     return interventions
 
 
+# ── Budget Intervention Estimator ──────────────────────────────────────────
+# Cost benchmarks based on Karnataka RDPR & PMGSY rates (2024-25)
+# All values in Indian Rupees (₹)
+
+INFRA_COST_CATALOG: Dict[str, Dict[str, Any]] = {
+    "street_lighting": {
+        "label":       "Solar LED Street Lighting",
+        "category":    "Safety & Lighting",
+        "unit":        "pole",
+        "unit_cost":   18000,
+        "description": "40W solar LED pole with battery, auto dusk-dawn",
+    },
+    "cctv": {
+        "label":       "CCTV Surveillance Camera",
+        "category":    "Safety & Lighting",
+        "unit":        "camera",
+        "unit_cost":   35000,
+        "description": "IP67 weatherproof camera with 30-day local storage",
+    },
+    "bus_stop": {
+        "label":       "Covered Bus Stop Shelter",
+        "category":    "Transit Infrastructure",
+        "unit":        "shelter",
+        "unit_cost":   120000,
+        "description": "Steel-frame shelter with seating for 10, signage board",
+    },
+    "road_paving": {
+        "label":       "Road Paving (CC / Bitumen)",
+        "category":    "Road Infrastructure",
+        "unit":        "km",
+        "unit_cost":   2500000,
+        "description": "3.75m wide CC road per PMGSY spec, incl. drainage",
+    },
+    "footpath": {
+        "label":       "Paved Footpath with Handrails",
+        "category":    "Road Infrastructure",
+        "unit":        "km",
+        "unit_cost":   800000,
+        "description": "1.5m wide cement footpath with MS handrails",
+    },
+    "covered_walkway": {
+        "label":       "Covered Walkway (Flood-Prone)",
+        "category":    "Weather Protection",
+        "unit":        "100m section",
+        "unit_cost":   350000,
+        "description": "Elevated concrete walkway with roof, 2m wide",
+    },
+    "drainage": {
+        "label":       "Storm-Water Drain",
+        "category":    "Weather Protection",
+        "unit":        "km",
+        "unit_cost":   600000,
+        "description": "Open masonry drain along road, 0.6m x 0.6m",
+    },
+    "sms_alert_system": {
+        "label":       "SMS Weather Alert System",
+        "category":    "Technology",
+        "unit":        "setup",
+        "unit_cost":   45000,
+        "description": "Annual setup: API integration + SMS credits for 500 parents",
+    },
+    "toilet_block": {
+        "label":       "Toilet Block (4 units)",
+        "category":    "School Facilities",
+        "unit":        "block",
+        "unit_cost":   280000,
+        "description": "4-unit toilet block with water tank, SBM spec",
+    },
+    "library": {
+        "label":       "Mini Library Setup",
+        "category":    "School Facilities",
+        "unit":        "setup",
+        "unit_cost":   95000,
+        "description": "Bookshelves, 500 books, reading space furniture",
+    },
+    "drinking_water": {
+        "label":       "RO Drinking Water Unit",
+        "category":    "School Facilities",
+        "unit":        "unit",
+        "unit_cost":   65000,
+        "description": "50 LPH RO purifier with storage tank",
+    },
+    "police_escort": {
+        "label":       "Community Police Escort Program",
+        "category":    "Safety & Lighting",
+        "unit":        "year",
+        "unit_cost":   180000,
+        "description": "2 wardens, morning + evening shift, annual cost",
+    },
+    "buddy_system": {
+        "label":       "Student Buddy/Group-Walk Program",
+        "category":    "Community Programs",
+        "unit":        "year",
+        "unit_cost":   25000,
+        "description": "Coordination, reflective vests, whistle kits",
+    },
+    "ngo_partnership": {
+        "label":       "NGO Route Warden Volunteers",
+        "category":    "Community Programs",
+        "unit":        "year",
+        "unit_cost":   60000,
+        "description": "Stipend & training for 3 local volunteers",
+    },
+    "shift_management": {
+        "label":       "Staggered Dismissal System",
+        "category":    "Operational",
+        "unit":        "setup",
+        "unit_cost":   15000,
+        "description": "Signage, timetable redesign, parent comms",
+    },
+}
+
+
+def _estimate_budget(
+    suggested_fixes: List[Dict],
+    need_data: Dict,
+    school: Dict,
+    crime_hotspot_count: int = 0,
+    terrain_issue_count: int = 0,
+) -> Dict[str, Any]:
+    """
+    Map each suggested fix to items from INFRA_COST_CATALOG.
+    Returns per-item breakdown + category totals + grand total.
+    """
+    line_items: List[Dict] = []
+
+    # Compute quantities from context
+    n_hotspots = max(crime_hotspot_count, 1)
+    avg_route_km = 2.5  # average student commute distance in Yadagiri
+    missing_facilities = []
+    all_possible = {"library", "lab", "playground", "transport", "midday_meal", "hostel"}
+    existing = set(school.get("facilities", []))
+    missing_facilities = all_possible - existing
+
+    for fix in suggested_fixes:
+        fix_text = fix.get("fix", "").lower()
+
+        if "street lighting" in fix_text or "motion-sensor" in fix_text:
+            qty = n_hotspots * 4  # 4 poles per hotspot zone
+            item = INFRA_COST_CATALOG["street_lighting"]
+            line_items.append({**item, "quantity": qty, "total": item["unit_cost"] * qty,
+                               "fix_ref": fix["fix"]})
+
+        if "cctv" in fix_text:
+            qty = max(n_hotspots * 2, 4)
+            item = INFRA_COST_CATALOG["cctv"]
+            line_items.append({**item, "quantity": qty, "total": item["unit_cost"] * qty,
+                               "fix_ref": fix["fix"]})
+
+        if "footpath" in fix_text or "paved" in fix_text or "handrail" in fix_text:
+            qty_km = round(avg_route_km * 0.4, 1)  # ~40% of route needs footpath
+            item = INFRA_COST_CATALOG["footpath"]
+            line_items.append({**item, "quantity": qty_km, "total": int(item["unit_cost"] * qty_km),
+                               "fix_ref": fix["fix"]})
+
+        if "covered walkway" in fix_text:
+            qty = max(terrain_issue_count, 1) * 2  # 2 sections per issue zone
+            item = INFRA_COST_CATALOG["covered_walkway"]
+            line_items.append({**item, "quantity": qty, "total": item["unit_cost"] * qty,
+                               "fix_ref": fix["fix"]})
+
+        if "weather alert" in fix_text or "sms" in fix_text:
+            item = INFRA_COST_CATALOG["sms_alert_system"]
+            line_items.append({**item, "quantity": 1, "total": item["unit_cost"],
+                               "fix_ref": fix["fix"]})
+
+        if "police escort" in fix_text or "community police" in fix_text:
+            item = INFRA_COST_CATALOG["police_escort"]
+            line_items.append({**item, "quantity": 1, "total": item["unit_cost"],
+                               "fix_ref": fix["fix"]})
+
+        if "buddy" in fix_text or "group-walk" in fix_text:
+            item = INFRA_COST_CATALOG["buddy_system"]
+            line_items.append({**item, "quantity": 1, "total": item["unit_cost"],
+                               "fix_ref": fix["fix"]})
+
+        if "ngo" in fix_text or "warden" in fix_text or "volunteer" in fix_text:
+            item = INFRA_COST_CATALOG["ngo_partnership"]
+            line_items.append({**item, "quantity": 1, "total": item["unit_cost"],
+                               "fix_ref": fix["fix"]})
+
+        if "infrastructure upgrade" in fix_text or "toilet" in fix_text:
+            if "library" not in existing:
+                item = INFRA_COST_CATALOG["library"]
+                line_items.append({**item, "quantity": 1, "total": item["unit_cost"],
+                                   "fix_ref": fix["fix"]})
+            item = INFRA_COST_CATALOG["toilet_block"]
+            line_items.append({**item, "quantity": 1, "total": item["unit_cost"],
+                               "fix_ref": fix["fix"]})
+            item = INFRA_COST_CATALOG["drinking_water"]
+            line_items.append({**item, "quantity": 1, "total": item["unit_cost"],
+                               "fix_ref": fix["fix"]})
+
+        if "shift" in fix_text or "stagger" in fix_text or "dismissal" in fix_text:
+            item = INFRA_COST_CATALOG["shift_management"]
+            line_items.append({**item, "quantity": 1, "total": item["unit_cost"],
+                               "fix_ref": fix["fix"]})
+
+    # Deduplicate by label
+    seen = set()
+    unique_items = []
+    for li in line_items:
+        if li["label"] not in seen:
+            seen.add(li["label"])
+            unique_items.append(li)
+    line_items = unique_items
+
+    grand_total = sum(li["total"] for li in line_items)
+
+    # Category breakdown
+    categories: Dict[str, int] = {}
+    for li in line_items:
+        cat = li["category"]
+        categories[cat] = categories.get(cat, 0) + li["total"]
+
+    return {
+        "line_items": [
+            {
+                "label":       li["label"],
+                "category":    li["category"],
+                "unit":        li["unit"],
+                "unit_cost":   li["unit_cost"],
+                "quantity":    li["quantity"],
+                "total":       li["total"],
+                "description": li["description"],
+            }
+            for li in line_items
+        ],
+        "category_breakdown": [
+            {"category": cat, "total": total}
+            for cat, total in sorted(categories.items(), key=lambda x: -x[1])
+        ],
+        "grand_total":  grand_total,
+        "currency":     "INR",
+        "note":         "Estimates based on Karnataka RDPR & PMGSY 2024-25 benchmark rates. "
+                        "Actual costs may vary ±20% based on site conditions and contractor rates.",
+    }
+
+
 def _detect_crime_hotspots(
     lat: float, lon: float, radius: float = 0.10
 ) -> List[Dict]:
@@ -790,9 +1029,21 @@ def school_analysis(req: SchoolAnalysisRequest) -> Dict[str, Any]:
             "cost_tier":  "medium",
             "hotspot_count": len(hotspots),
         })
+    if hotspots and len(hotspots) >= 2:
+        suggested_fixes.append({
+            "fix":        "Install CCTV cameras along primary access roads",
+            "priority":   "high",
+            "cost_tier":  "medium",
+        })
     if terrain_issues:
         suggested_fixes.append({
             "fix":        "Construct paved footpath with handrails on steep segments",
+            "priority":   "high",
+            "cost_tier":  "high",
+        })
+    if any(t.get("issue", "").lower().find("waterlog") >= 0 for t in terrain_issues):
+        suggested_fixes.append({
+            "fix":        "Build covered walkways at key flood-prone segments",
             "priority":   "high",
             "cost_tier":  "high",
         })
@@ -802,6 +1053,15 @@ def school_analysis(req: SchoolAnalysisRequest) -> Dict[str, Any]:
             "priority":  "medium",
             "cost_tier": "low",
         })
+
+    # ── Budget Estimation ──
+    budget_estimate = _estimate_budget(
+        suggested_fixes,
+        need_data,
+        school,
+        crime_hotspot_count=len(hotspots),
+        terrain_issue_count=len(terrain_issues),
+    )
 
     # ── Confidence ──
     confidence_score = min(
@@ -828,8 +1088,65 @@ def school_analysis(req: SchoolAnalysisRequest) -> Dict[str, Any]:
         "crime_hotspots":    hotspots,
         "need_assessment":   need_data,
         "suggested_fixes":   suggested_fixes,
+        "budget_estimate":   budget_estimate,
         "confidence_score":  round(confidence_score, 4),
         "generated_at":      datetime.utcnow().isoformat() + "Z",
+    }
+
+
+# ── GET /api/budget/estimate ────────────────────────────────────────────────
+
+@app.get("/api/budget/estimate", tags=["Budget"])
+def budget_estimate(
+    school_id: str = Query(..., example="SCH001"),
+) -> Dict[str, Any]:
+    """
+    Standalone budget estimation for a school's infrastructure gaps.
+    Returns itemised cost breakdown for all recommended interventions.
+    """
+    school = SCHOOL_INDEX.get(school_id)
+    if not school:
+        raise HTTPException(
+            status_code=404,
+            detail=f"School '{school_id}' not found.",
+        )
+
+    need_data = _score_school_need(school)
+    interventions_text = _get_interventions(need_data, school)
+
+    # Build fixes from need data
+    fixes = []
+    if need_data["crime_risk"] > 0.55:
+        fixes.append({"fix": "Install motion-sensor street lighting at crime hotspots",
+                      "priority": "immediate", "cost_tier": "medium"})
+        fixes.append({"fix": "Install CCTV cameras along primary access roads",
+                      "priority": "high", "cost_tier": "medium"})
+    if need_data["pop_density"] < 0.30:
+        fixes.append({"fix": "Establish student buddy-system or group-walk programs",
+                      "priority": "medium", "cost_tier": "low"})
+        fixes.append({"fix": "Partner with local NGOs for route warden volunteers",
+                      "priority": "medium", "cost_tier": "low"})
+    if need_data["weather_risk"] > 0.50:
+        fixes.append({"fix": "Build covered walkways at key flood-prone segments",
+                      "priority": "high", "cost_tier": "high"})
+        fixes.append({"fix": "Provide weather alerts via SMS for parents",
+                      "priority": "medium", "cost_tier": "low"})
+    if need_data["n_facilities"] < 3:
+        fixes.append({"fix": "Prioritise infrastructure upgrades (toilet, library, water)",
+                      "priority": "high", "cost_tier": "medium"})
+    if need_data["students"] > 600:
+        fixes.append({"fix": "Add a second shift or stagger dismissal times to reduce crowding",
+                      "priority": "medium", "cost_tier": "low"})
+
+    hotspots = _detect_crime_hotspots(school["lat"], school["lon"], radius=0.08)
+    estimate = _estimate_budget(fixes, need_data, school,
+                                crime_hotspot_count=len(hotspots))
+
+    return {
+        "school_id":   school["school_id"],
+        "school_name": school["name"],
+        "budget":      estimate,
+        "generated_at": datetime.utcnow().isoformat() + "Z",
     }
 
 

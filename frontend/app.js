@@ -530,11 +530,111 @@ function renderSchoolAnalysis(data) {
       `).join('')}
     </div>
 
+    ${data.budget_estimate ? renderBudgetEstimator(data.budget_estimate) : ''}
+
     <div style="text-align:right;font-size:0.75rem;color:var(--text-muted)">
       <span data-i18n="lbl_confidence">Confidence:</span> ${pct(data.confidence_score)} · ${new Date(data.generated_at).toLocaleString()}
     </div>
   `;
   if (window.changeLanguage) window.changeLanguage(document.documentElement.lang || 'en');
+}
+
+// ── Budget Intervention Estimator ──
+function formatINR(amount) {
+  if (amount >= 10000000) return '₹' + (amount / 10000000).toFixed(2) + ' Cr';
+  if (amount >= 100000)   return '₹' + (amount / 100000).toFixed(2) + ' L';
+  if (amount >= 1000)     return '₹' + (amount / 1000).toFixed(1) + 'K';
+  return '₹' + amount.toLocaleString('en-IN');
+}
+
+function renderBudgetEstimator(budget) {
+  if (!budget || !budget.line_items || budget.line_items.length === 0) return '';
+
+  const maxCat = Math.max(...budget.category_breakdown.map(c => c.total));
+
+  const categoryColors = {
+    'Safety & Lighting':     '#C0392B',
+    'Road Infrastructure':   '#D4852A',
+    'Weather Protection':    '#2E6B8A',
+    'Transit Infrastructure':'#3A8C6E',
+    'School Facilities':     '#1A6B3C',
+    'Technology':            '#6C5CE7',
+    'Community Programs':    '#22c55e',
+    'Operational':           '#8A8A8A',
+  };
+
+  return `
+    <div class="analysis-section budget-estimator">
+      <h4>💰 Budget Intervention Estimator</h4>
+
+      <div class="budget-hero-card">
+        <div class="budget-hero-top">
+          <div>
+            <div class="budget-hero-label">Estimated Total Investment</div>
+            <div class="budget-hero-amount">${formatINR(budget.grand_total)}</div>
+          </div>
+          <div class="budget-hero-meta">
+            <span class="badge" style="background:rgba(26,107,60,0.08);border-color:rgba(26,107,60,0.2);color:var(--accent-1)">${budget.line_items.length} line items</span>
+            <span class="badge">${budget.category_breakdown.length} categories</span>
+          </div>
+        </div>
+        <div class="budget-note">${budget.note}</div>
+      </div>
+
+      <div class="budget-category-section">
+        <h5 class="budget-sub-title">Category Breakdown</h5>
+        <div class="budget-categories">
+          ${budget.category_breakdown.map(cat => {
+            const pctVal = ((cat.total / budget.grand_total) * 100).toFixed(0);
+            const color = categoryColors[cat.category] || '#1A6B3C';
+            return `
+            <div class="budget-cat-row">
+              <div class="budget-cat-header">
+                <span class="budget-cat-dot" style="background:${color}"></span>
+                <span class="budget-cat-name">${cat.category}</span>
+                <span class="budget-cat-amount">${formatINR(cat.total)} <span class="budget-cat-pct">(${pctVal}%)</span></span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:${(cat.total / maxCat) * 100}%;background:${color}"></div></div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="budget-table-section">
+        <h5 class="budget-sub-title">Itemized Cost Breakdown</h5>
+        <div class="budget-table-wrap">
+          <table class="budget-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Unit Cost</th>
+                <th>Qty</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${budget.line_items.map(li => `
+                <tr>
+                  <td>
+                    <div class="budget-item-label">${li.label}</div>
+                    <div class="budget-item-desc">${li.description}</div>
+                  </td>
+                  <td class="budget-td-num">${formatINR(li.unit_cost)}/${li.unit}</td>
+                  <td class="budget-td-num">${li.quantity}</td>
+                  <td class="budget-td-num budget-td-total">${formatINR(li.total)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="budget-tf-label">Grand Total</td>
+                <td class="budget-td-num budget-td-grand">${formatINR(budget.grand_total)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>`;
 }
 
 // ── Helpers ──
